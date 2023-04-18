@@ -9,12 +9,15 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
-import { TextField } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import { TextField, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 const CustomTable = styled(Table)``;
 const SearchBar = styled(TextField)`
   margin-top: 5px;
+  width: 525px;
 `;
 
 function createData(number, name, type, count, createdBy, date, action) {
@@ -33,52 +36,76 @@ const Campaigns = () => {
     setSearchText(event.target.value);
   };
   return (
-    <TableContainer component={Paper}>
-      <Stack direction="row" justifyContent="end">
-        <SearchBar
-          label="Search"
-          variant="outlined"
-          size="small"
-          value={searchText}
-          onChange={handleSearchInputChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment>
-                <SearchIcon />
-              </InputAdornment>
-            ),
+    <>
+      <Container sx={{ display: "flex" }} maxWidth={false}>
+        <div>
+          <Typography variant="h6">Campaigns</Typography>
+          <Typography fontStyle="italic" fontSize={12}>
+            You can communicate with your customers directly from this section
+          </Typography>
+        </div>
+        <Button
+          style={{
+            backgroundColor: "#6ac17a",
+            borderRadius: "0",
+            height: "40px",
           }}
-        />
-      </Stack>
-      <CustomTable>
-        <TableHead>
-          <TableRow>
-            <TableCell>#</TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Type</TableCell>
-            <TableCell>Count</TableCell>
-            <TableCell>Created By</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Action</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.number}>
-              <TableCell component="th" scope="row">
-                {row.number}
-              </TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.type}</TableCell>
-              <TableCell>{row.count}</TableCell>
-              <TableCell>{row.createdBy}</TableCell>
-              <TableCell>{row.date}</TableCell>
-              <TableCell>{row.action}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </CustomTable>
-    </TableContainer>
+          variant="contained"
+          sx={{ marginLeft: "auto" }}
+        >
+          NEW THREAD
+        </Button>
+      </Container>
+
+      <Container sx={{ border: 5, borderColor: "#f8f4f4" }} maxWidth={false}>
+        <TableContainer component={Paper}>
+          <Stack direction="row" justifyContent="end">
+            <SearchBar
+              variant="outlined"
+              size="small"
+              placeholder="Search"
+              value={searchText}
+              onChange={handleSearchInputChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment>
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Stack>
+          <CustomTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>#</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Count</TableCell>
+                <TableCell>Created By</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.number}>
+                  <TableCell component="th" scope="row">
+                    {row.number}
+                  </TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.type}</TableCell>
+                  <TableCell>{row.count}</TableCell>
+                  <TableCell>{row.createdBy}</TableCell>
+                  <TableCell>{row.date}</TableCell>
+                  <TableCell>{row.action}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </CustomTable>
+        </TableContainer>
+      </Container>
+    </>
   );
 };
 
