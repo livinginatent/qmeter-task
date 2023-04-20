@@ -9,6 +9,8 @@ import {
   Typography,
   Divider,
   Button,
+  Autocomplete,
+  Chip,
 } from "@mui/material";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
@@ -42,7 +44,6 @@ const MailThread = () => {
     customerName,
     subject,
     dropdownOption,
-    to,
     startSending,
     editorContent,
   } = formData;
@@ -67,6 +68,26 @@ const MailThread = () => {
     // Submit the formData object, including the editor content
     console.log(formData);
   };
+
+  /* const emailList = [
+  { title: "customer1@example.com", group: "Customers" },
+  { title: "customer2@example.com", group: "Customers" },
+  
+]; */
+
+ /*  const [emailList, setEmailList] = useState([
+    { title: "customer1@example.com", group: "Customers" },
+    { title: "customer2@example.com", group: "Customers" },
+    { title: "customer2@example.com", group: "Receivers" },
+    { title: "customer2@example.com", group: "Receivers" },
+  ]);
+ */
+  const emailList = [
+    { title: "customer1@example.com", group: "Customers" },
+    { title: "customer2@example.com", group: "Customers" },
+    { title: "wedexample.com", group: "Receivers" },
+    { title: "wdf@example.com", group: "Receivers" },
+  ];
 
   return (
     <>
@@ -101,7 +122,7 @@ const MailThread = () => {
                 value={dropdownOption}
                 placeholder="Enter subject here"
                 onChange={onChange}
-                single='true'
+                single="true"
               >
                 <MenuItem value={dropdownOption}>QNP-102 Template</MenuItem>
               </Field>
@@ -121,7 +142,26 @@ const MailThread = () => {
             </Grid>
             <Grid item xs={6}>
               <FieldName>To{asterisk}</FieldName>
-              <Field name="to" value={to} onChange={onChange} />
+              <Autocomplete
+                multiple
+                id="tags-filled"
+                options={emailList.map((option) => option.title)}
+                groupBy={(option) => option.group}
+                defaultValue={[emailList[0].title]}
+                freeSolo
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField {...params} variant="outlined" />
+                )}
+              />
             </Grid>
             <Grid item xs={6}>
               <FieldName>If Customer name is empty</FieldName>
@@ -134,6 +174,7 @@ const MailThread = () => {
             <Grid item xs={6}>
               <FieldName>Start Sending {asterisk}</FieldName>
               <Field
+                name="startSending"
                 value={startSending}
                 type="date"
                 placeholder="Select date"
@@ -174,9 +215,7 @@ const MailThread = () => {
           </Button>
         </Container>
       </Container>
-      <Container>
-
-      </Container>
+      <Container></Container>
     </>
   );
 };
