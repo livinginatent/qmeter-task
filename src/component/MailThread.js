@@ -72,23 +72,40 @@ const MailThread = () => {
   const [emailList, setEmailList] = useState([
     { title: "customer1@example.com", group: "Customers" },
     { title: "customer2@example.com", group: "Customers" },
-    
   ]);
 
+  const [selectedEmails, setSelectedEmails] = useState([]);
   const [newEmail, setNewEmail] = useState("");
+  const [newEmailLabel, setNewEmailLabel] = useState("");
 
   const onEmailKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const newEmailList = [
-        ...emailList,
-        { title: newEmail, group: "Receivers"},
-      ];
-      setEmailList(newEmailList);
+
+      // Check if the email already exists in the selected emails array
+      const emailExists = selectedEmails.some(
+        (email) => email.title === newEmail
+      );
+
+      if (!emailExists) {
+        const newEmailList = [
+          ...emailList,
+          { title: newEmail, group: "Receivers" },
+        ];
+        setEmailList(newEmailList);
+
+        const newSelectedEmails = [
+          ...selectedEmails,
+          { title: newEmail, group: "Receivers" },
+        ];
+        setSelectedEmails(newSelectedEmails);
+        setNewEmailLabel(newEmail);
+        setNewEmail("");
+
+        // Clear the input field after adding the new email
+      }
     }
   };
-
- 
 
   return (
     <>
@@ -146,27 +163,34 @@ const MailThread = () => {
               <Autocomplete
                 multiple
                 id="tags-filled"
-                options={emailList}
+                options={[{ title: "Choose All" }, ...emailList]}
                 groupBy={(option) => option.group}
                 getOptionLabel={(option) => option.title}
                 freeSolo
+                value={selectedEmails}
+                onChange={(event, newValue) => {
+                  if (
+                    newValue &&
+                    newValue.find((option) => option.title === "Choose All")
+                  ) {
+                    setSelectedEmails(emailList);
+                  } else {
+                    setSelectedEmails(newValue);
+                  }
+                }}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => {
-                    const label = option.title;
-                    const isExistingEmail = emailList.some(
-                      (email) => email.title === option.title
-                    );
-                    const tagLabel = isExistingEmail ? label : newEmail;
+                    const label = option.title || option;
+                    
                     return (
                       <Chip
                         variant="outlined"
-                        label={tagLabel}
+                        label={label}
                         {...getTagProps({ index })}
                       />
                     );
                   })
                 }
-                
                 renderInput={(params) => (
                   <TextField
                     onChange={(e) => setNewEmail(e.target.value)}
