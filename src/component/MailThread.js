@@ -69,25 +69,26 @@ const MailThread = () => {
     console.log(formData);
   };
 
-  /* const emailList = [
-  { title: "customer1@example.com", group: "Customers" },
-  { title: "customer2@example.com", group: "Customers" },
-  
-]; */
-
- /*  const [emailList, setEmailList] = useState([
+  const [emailList, setEmailList] = useState([
     { title: "customer1@example.com", group: "Customers" },
     { title: "customer2@example.com", group: "Customers" },
-    { title: "customer2@example.com", group: "Receivers" },
-    { title: "customer2@example.com", group: "Receivers" },
+    
   ]);
- */
-  const emailList = [
-    { title: "customer1@example.com", group: "Customers" },
-    { title: "customer2@example.com", group: "Customers" },
-    { title: "wedexample.com", group: "Receivers" },
-    { title: "wdf@example.com", group: "Receivers" },
-  ];
+
+  const [newEmail, setNewEmail] = useState("");
+
+  const onEmailKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const newEmailList = [
+        ...emailList,
+        { title: newEmail, group: "Receivers"},
+      ];
+      setEmailList(newEmailList);
+    }
+  };
+
+ 
 
   return (
     <>
@@ -145,21 +146,34 @@ const MailThread = () => {
               <Autocomplete
                 multiple
                 id="tags-filled"
-                options={emailList.map((option) => option.title)}
+                options={emailList}
                 groupBy={(option) => option.group}
-                defaultValue={[emailList[0].title]}
+                getOptionLabel={(option) => option.title}
                 freeSolo
                 renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      label={option}
-                      {...getTagProps({ index })}
-                    />
-                  ))
+                  value.map((option, index) => {
+                    const label = option.title;
+                    const isExistingEmail = emailList.some(
+                      (email) => email.title === option.title
+                    );
+                    const tagLabel = isExistingEmail ? label : newEmail;
+                    return (
+                      <Chip
+                        variant="outlined"
+                        label={tagLabel}
+                        {...getTagProps({ index })}
+                      />
+                    );
+                  })
                 }
+                
                 renderInput={(params) => (
-                  <TextField {...params} variant="outlined" />
+                  <TextField
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    onKeyDown={onEmailKeyDown}
+                    {...params}
+                    variant="outlined"
+                  />
                 )}
               />
             </Grid>
