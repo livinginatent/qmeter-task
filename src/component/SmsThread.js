@@ -31,15 +31,14 @@ const FieldName = styled(Typography)`
 
 const asterisk = <span style={{ color: "red" }}>*</span>;
 
-const MailThread = () => {
-  const campaigns = useSelector((state) => state.campaign.campaigns);
-  
+const SmsThread = () => {
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
-    type: "Email",
+    type: "SMS",
     threadName: "",
     from: "Qmeter or 2354",
     customerName: "",
-    subject: "",
     dropdownOption: "QNP-102 Template",
     to: [],
     startSending: new Date(),
@@ -49,7 +48,6 @@ const MailThread = () => {
     threadName,
     from,
     customerName,
-    subject,
     dropdownOption,
     startSending,
     editorContent,
@@ -62,47 +60,48 @@ const MailThread = () => {
     }));
   };
 
+  const [smsCount, setSmsCount] = useState(0);
+
   // Update the editorContent state variable when the user types into the editor
-  const onEditorChange = (value) => {
+  const onEditorChange = (content, delta, source, editor) => {
     setFormData((prevState) => ({
       ...prevState,
-      editorContent: value,
+      editorContent: content,
     }));
+
+    let limit = 156;
+    let charCount = editor.getLength() - 1;
+    let result = Math.ceil(charCount / limit);
+    setSmsCount(result);
   };
 
-  const [emailList, setEmailList] = useState([
-    { title: "customer1@example.com", group: "Customers" },
-    { title: "customer2@example.com", group: "Customers" },
+  const [smsList, setSmsList] = useState([
+    { title: "John Doe", group: "Customers" },
+    { title: "John Smith", group: "Customers" },
   ]);
 
-  const [selectedEmails, setSelectedEmails] = useState([]);
-  const [newEmail, setNewEmail] = useState("");
+  const [selectedSmss, setSelectedSmss] = useState([]);
+  const [newSms, setNewSms] = useState("");
 
-  const onEmailKeyDown = (e) => {
+  const onSmsKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
 
-      // Check if the email already exists in the selected emails array
-      const emailExists = selectedEmails.some(
-        (email) => email.title === newEmail
-      );
+      // Check if the Sms already exists in the selected Smss array
+      const smsExists = selectedSmss.some((sms) => sms.title === newSms);
 
-      if (!emailExists) {
-        const newEmailList = [
-          ...emailList,
-          { title: newEmail, group: "Receivers" },
+      if (!smsExists) {
+        const newSmsList = [...smsList, { title: newSms, group: "Receivers" }];
+        setSmsList(newSmsList);
+
+        const newSelectedSmss = [
+          ...selectedSmss,
+          { title: newSms, group: "Receivers" },
         ];
-        setEmailList(newEmailList);
+        setSelectedSmss(newSelectedSmss);
+        setNewSms("");
 
-        const newSelectedEmails = [
-          ...selectedEmails,
-          { title: newEmail, group: "Receivers" },
-        ];
-        setSelectedEmails(newSelectedEmails);
-
-        setNewEmail("");
-
-        // Clear the input field after adding the new email
+        // Clear the input field after adding the new Sms
       }
     }
   };
@@ -118,10 +117,7 @@ const MailThread = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     openModal();
-
   };
-
-  console.log(campaigns);
 
   return (
     <>
@@ -129,10 +125,10 @@ const MailThread = () => {
         <Grid item xs={8}>
           <Container
             component="form"
-            onSubmit={handleSubmit}
             sx={{ backgroundColor: "white" }}
             noValidate
             maxWidth={false}
+            onSubmit={handleSubmit}
           >
             <Container noValidate maxWidth={false}>
               <CssBaseline />
@@ -185,11 +181,11 @@ const MailThread = () => {
                     <Autocomplete
                       multiple
                       id="tags-filled"
-                      options={[{ title: "Choose All" }, ...emailList]}
+                      options={[{ title: "Choose All" }, ...smsList]}
                       groupBy={(option) => option.group}
                       getOptionLabel={(option) => option.title}
                       freeSolo
-                      value={selectedEmails}
+                      value={selectedSmss}
                       onChange={(event, newValue) => {
                         if (
                           newValue &&
@@ -197,15 +193,14 @@ const MailThread = () => {
                             (option) => option.title === "Choose All"
                           )
                         ) {
-                          setSelectedEmails(emailList);
+                          setSelectedSmss(smsList);
                         } else {
-                          setSelectedEmails(newValue);
+                          setSelectedSmss(newValue);
                         }
                          setFormData((prevState) => ({
                            ...prevState,
-                           to: emailList.map((email)=>email.title)
+                           to: smsList.map((sms) => sms.title),
                          }));
-
                       }}
                       renderTags={(value, getTagProps) =>
                         value.map((option, index) => {
@@ -222,8 +217,8 @@ const MailThread = () => {
                       }
                       renderInput={(params) => (
                         <TextField
-                          onChange={(e) => setNewEmail(e.target.value)}
-                          onKeyDown={onEmailKeyDown}
+                          onChange={(e) => setNewSms(e.target.value)}
+                          onKeyDown={onSmsKeyDown}
                           {...params}
                           variant="outlined"
                         />
@@ -248,15 +243,6 @@ const MailThread = () => {
                       onChange={onChange}
                     />
                   </Grid>
-                  <Grid item xs={6}>
-                    <FieldName>Subject</FieldName>
-                    <Field
-                      name="subject"
-                      value={subject}
-                      placeholder="Enter subject here"
-                      onChange={onChange}
-                    />
-                  </Grid>
                 </Grid>
               </Box>
               <Divider sx={{ mt: "10px", mb: "10px" }} />
@@ -271,6 +257,7 @@ const MailThread = () => {
               >
                 <Button
                   type="submit"
+                  onClick={handleSubmit}
                   style={{
                     backgroundColor: "#6ac17a",
                     borderRadius: "0",
@@ -318,7 +305,31 @@ const MailThread = () => {
                 justifyContent: "space-between",
               }}
             >
+              SMS balance
+              <Typography sx={{ fontWeight: "700", ml: "10px" }}>
+                {smsCount}
+              </Typography>
+            </Typography>
+            <Divider sx={{ mt: "10px", mb: "10px" }} />
+            <Typography
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               Feedback balance
+              <Typography sx={{ fontWeight: "700", ml: "10px" }}>0</Typography>
+            </Typography>
+            <Divider sx={{ mt: "10px", mb: "10px" }} />
+            <Typography
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              Total price
               <Typography sx={{ fontWeight: "700", ml: "10px" }}>0</Typography>
             </Typography>
             <Divider sx={{ mt: "10px", mb: "10px" }} />
@@ -329,4 +340,4 @@ const MailThread = () => {
   );
 };
 
-export default MailThread;
+export default SmsThread;

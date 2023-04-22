@@ -13,6 +13,8 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { TextField, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import EmailOrSms from "./EmailOrSms";
+import { useSelector } from "react-redux";
 
 const CustomTable = styled(Table)``;
 const SearchBar = styled(TextField)`
@@ -20,21 +22,21 @@ const SearchBar = styled(TextField)`
   width: 525px;
 `;
 
-function createData(number, name, type, count, createdBy, date, action) {
-  return { number, name, type, count, createdBy, date, action };
-}
-
-const rows = [
-  createData(1, "Item 1", "Email", 5, "User 1", "2022-04-16", "Edit"),
-  createData(2, "Item 2", "Phone", 3, "User 2", "2022-04-17", "Edit"),
-  createData(3, "Item 3", "Address", 2, "User 3", "2022-04-18", "Edit"),
-];
-
 const Campaigns = () => {
   const [searchText, setSearchText] = useState("");
   const handleSearchInputChange = (event) => {
     setSearchText(event.target.value);
   };
+
+  const [openNewThread, setOpenNewThread] = useState(false);
+  const handleOpenNewThread = () => {
+    setOpenNewThread(true);
+  };
+  const handleCloseNewThread = () => {
+    setOpenNewThread(false);
+  };
+
+  const campaigns = useSelector((state) => state.campaign.campaigns);
   return (
     <>
       <Container sx={{ display: "flex" }} maxWidth={false}>
@@ -52,9 +54,11 @@ const Campaigns = () => {
           }}
           variant="contained"
           sx={{ marginLeft: "auto" }}
+          onClick={handleOpenNewThread}
         >
           NEW THREAD
         </Button>
+        <EmailOrSms open={openNewThread} handleClose={handleCloseNewThread} />
       </Container>
 
       <Container sx={{ border: 5, borderColor: "#f8f4f4" }} maxWidth={false}>
@@ -68,7 +72,7 @@ const Campaigns = () => {
               onChange={handleSearchInputChange}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment>
+                  <InputAdornment position="start">
                     <SearchIcon />
                   </InputAdornment>
                 ),
@@ -81,24 +85,19 @@ const Campaigns = () => {
                 <TableCell>#</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Type</TableCell>
-                <TableCell>Count</TableCell>
-                <TableCell>Created By</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.number}>
-                  <TableCell component="th" scope="row">
-                    {row.number}
+              {campaigns.map((campaign) => (
+                <TableRow key={campaign.id}>
+                  <TableCell component="th" scope="campaign">
+                    {campaign.id}
                   </TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.type}</TableCell>
-                  <TableCell>{row.count}</TableCell>
-                  <TableCell>{row.createdBy}</TableCell>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell>{row.action}</TableCell>
+                  <TableCell>{campaign.threadName}</TableCell>
+                  <TableCell>{campaign.type}</TableCell>
+                  <TableCell>{campaign.startSending}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
