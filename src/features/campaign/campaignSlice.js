@@ -1,25 +1,37 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  campaigns:[]
-  
+  campaigns: [],
 };
 
 export const campaignSlice = createSlice({
   name: "campaign",
   initialState,
   reducers: {
-    newCampaign:((state,action)=>{
-        const newCampaign = {
-          ...action.payload,
-          id: state.campaigns.length + 1,
-        };
-        state.campaigns.push(newCampaign);
-    })
+    newCampaign: (state, action) => {
+      const newCampaign = {
+        ...action.payload,
+        id: state.campaigns.length + 1,
+        isDraft: false,
+      };
+      state.campaigns.push(newCampaign);
+    },
+    markEmailAsDraft: (state, action) => {
+      const campaign = state.campaigns.find(
+        (c) => c.id === action.payload.campaignId
+      );
+      if (campaign) {
+        const email = campaign.emails.find(
+          (e) => e.id === action.payload.emailId
+        );
+        if (email) {
+          email.isDraft = true;
+        }
+      }
+    },
   },
 });
 
-// Action creators are generated for each case reducer function
-export const { newCampaign } = campaignSlice.actions;
+export const { newCampaign, markEmailAsDraft } = campaignSlice.actions;
 
 export default campaignSlice.reducer;

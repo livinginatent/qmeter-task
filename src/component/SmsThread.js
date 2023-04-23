@@ -16,8 +16,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useDispatch, useSelector } from "react-redux";
-import { newCampaign } from "../features/campaign/campaignSlice";
+
 import ConfirmationModal from "./ConfirmationModal";
 
 const Field = styled(TextField)`
@@ -32,7 +31,9 @@ const FieldName = styled(Typography)`
 const asterisk = <span style={{ color: "red" }}>*</span>;
 
 const SmsThread = () => {
-  const dispatch = useDispatch();
+  const [smsCount, setSmsCount] = useState(0);
+
+  // Update the editorContent state variable when the user types into the editor
 
   const [formData, setFormData] = useState({
     type: "SMS",
@@ -41,7 +42,8 @@ const SmsThread = () => {
     customerName: "",
     dropdownOption: "QNP-102 Template",
     to: [],
-    startSending: new Date(),
+    startSending: new Date().toLocaleDateString(),
+    smsCount: smsCount,
   });
 
   const {
@@ -57,12 +59,10 @@ const SmsThread = () => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
+      smsCount: smsCount,
     }));
   };
 
-  const [smsCount, setSmsCount] = useState(0);
-
-  // Update the editorContent state variable when the user types into the editor
   const onEditorChange = (content, delta, source, editor) => {
     setFormData((prevState) => ({
       ...prevState,
@@ -197,10 +197,10 @@ const SmsThread = () => {
                         } else {
                           setSelectedSmss(newValue);
                         }
-                         setFormData((prevState) => ({
-                           ...prevState,
-                           to: smsList.map((sms) => sms.title),
-                         }));
+                        setFormData((prevState) => ({
+                          ...prevState,
+                          to: smsList.map((sms) => sms.title),
+                        }));
                       }}
                       renderTags={(value, getTagProps) =>
                         value.map((option, index) => {

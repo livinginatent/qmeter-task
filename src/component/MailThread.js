@@ -16,8 +16,6 @@ import EmailIcon from "@mui/icons-material/Email";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useDispatch, useSelector } from "react-redux";
-import { newCampaign } from "../features/campaign/campaignSlice";
 import ConfirmationModal from "./ConfirmationModal";
 
 const Field = styled(TextField)`
@@ -32,8 +30,6 @@ const FieldName = styled(Typography)`
 const asterisk = <span style={{ color: "red" }}>*</span>;
 
 const MailThread = () => {
-  const campaigns = useSelector((state) => state.campaign.campaigns);
-  
   const [formData, setFormData] = useState({
     type: "Email",
     threadName: "",
@@ -42,7 +38,7 @@ const MailThread = () => {
     subject: "",
     dropdownOption: "QNP-102 Template",
     to: [],
-    startSending: new Date(),
+    startSending: new Date().toLocaleDateString(),
   });
 
   const {
@@ -118,10 +114,7 @@ const MailThread = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     openModal();
-
   };
-
-  console.log(campaigns);
 
   return (
     <>
@@ -201,11 +194,10 @@ const MailThread = () => {
                         } else {
                           setSelectedEmails(newValue);
                         }
-                         setFormData((prevState) => ({
-                           ...prevState,
-                           to: emailList.map((email)=>email.title)
-                         }));
-
+                        setFormData((prevState) => ({
+                          ...prevState,
+                          to: emailList.map((email) => email.title),
+                        }));
                       }}
                       renderTags={(value, getTagProps) =>
                         value.map((option, index) => {

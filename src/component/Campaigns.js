@@ -15,6 +15,12 @@ import { TextField, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import EmailOrSms from "./EmailOrSms";
 import { useSelector } from "react-redux";
+import {
+  
+  useNavigate,
+  
+} from "react-router-dom";
+
 
 const CustomTable = styled(Table)``;
 const SearchBar = styled(TextField)`
@@ -37,6 +43,21 @@ const Campaigns = () => {
   };
 
   const campaigns = useSelector((state) => state.campaign.campaigns);
+
+  const navigate = useNavigate();
+
+  const handleDelete = (id) => {
+    // dispatch a delete action here
+  };
+
+  const handleView = (id) => {
+    navigate(`view-campaign/${id}`);
+  };
+
+  const handleEdit = (id) => {
+    // navigate to the edit page for this email using react-router-dom
+  };
+
   return (
     <>
       <Container sx={{ display: "flex" }} maxWidth={false}>
@@ -98,6 +119,32 @@ const Campaigns = () => {
                   <TableCell>{campaign.threadName}</TableCell>
                   <TableCell>{campaign.type}</TableCell>
                   <TableCell>{campaign.startSending}</TableCell>
+                  <TableCell>
+                    {campaign.isDraft ? (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleEdit(campaign.id)}
+                      >
+                        Edit
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleView(campaign.id, campaign.type)}
+                      >
+                        View
+                      </Button>
+                    )}
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleDelete(campaign.id)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
