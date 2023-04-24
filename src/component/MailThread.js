@@ -17,6 +17,7 @@ import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import ConfirmationModal from "./ConfirmationModal";
+import { useNavigate } from "react-router-dom";
 
 const Field = styled(TextField)`
   // Custom TextField to avoid styling repetitions
@@ -30,8 +31,10 @@ const FieldName = styled(Typography)`
 const asterisk = <span style={{ color: "red" }}>*</span>;
 
 const MailThread = () => {
+  const fromComponent = "EmailCampaign";
   const [formData, setFormData] = useState({
     type: "Email",
+    dateCreated: new Date().toLocaleString(),
     threadName: "",
     from: "Qmeter or 2354",
     customerName: "",
@@ -50,6 +53,8 @@ const MailThread = () => {
     startSending,
     editorContent,
   } = formData;
+
+  const navigate = useNavigate();
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -111,11 +116,39 @@ const MailThread = () => {
     setIsModalOpen(false);
   };
 
+  const handleConfirm = () => {
+    return true;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (
+      formData.threadName.trim() === "" ||
+      formData.to.length === 0 ||
+      formData.startSending.trim() === ""
+    ) {
+      alert("Please fill in all required fields.");
+      handleCloseModal();
+      return;
+    }
+    if (formData.customerName === "") {
+      formData.customerName = "Customer";
+    }
     openModal();
   };
 
+  const handleDraft = () => {
+    // Get the existing drafts from localStorage
+    let drafts = JSON.parse(localStorage.getItem("drafts")) || [];
+
+    // Add the new formData to the drafts array
+    drafts.push(formData);
+
+    // Store the updated drafts array in localStorage
+    localStorage.setItem("drafts", JSON.stringify(drafts));
+    navigate("/");
+  };
   return (
     <>
       <Grid sx={{ backgroundColor: "white" }} container spacing={2}>
@@ -124,10 +157,9 @@ const MailThread = () => {
             component="form"
             onSubmit={handleSubmit}
             sx={{ backgroundColor: "white" }}
-            noValidate
             maxWidth={false}
           >
-            <Container noValidate maxWidth={false}>
+            <Container maxWidth={false}>
               <CssBaseline />
               <Box>
                 <Grid
@@ -176,6 +208,7 @@ const MailThread = () => {
                   <Grid item xs={6}>
                     <FieldName>To{asterisk}</FieldName>
                     <Autocomplete
+                      required={true}
                       multiple
                       id="tags-filled"
                       options={[{ title: "Choose All" }, ...emailList]}
@@ -196,7 +229,9 @@ const MailThread = () => {
                         }
                         setFormData((prevState) => ({
                           ...prevState,
-                          to: emailList.map((email) => email.title),
+                          to: newValue
+                            ? newValue.map((email) => email.title)
+                            : [],
                         }));
                       }}
                       renderTags={(value, getTagProps) =>
@@ -214,6 +249,13 @@ const MailThread = () => {
                       }
                       renderInput={(params) => (
                         <TextField
+                          {...params}
+                          value={selectedEmails}
+                          InputProps={{
+                            ...params.InputProps,
+                            required: selectedEmails.length === 0,
+                           
+                          }}
                           onChange={(e) => setNewEmail(e.target.value)}
                           onKeyDown={onEmailKeyDown}
                           {...params}
@@ -257,6 +299,7 @@ const MailThread = () => {
                 value={editorContent}
                 onChange={onEditorChange}
               />
+
               <Container
                 sx={{ display: "flex", justifyContent: "flex-end" }}
                 maxWidth={false}
@@ -272,13 +315,28 @@ const MailThread = () => {
                 >
                   SEND
                 </Button>
+
                 <ConfirmationModal
                   open={isModalOpen}
                   handleClose={handleCloseModal}
                   type={formData.type}
+                  confirm={handleConfirm}
                   formData={formData}
+                  fromComponent={fromComponent}
                 />
               </Container>
+              <Button
+                onClick={handleDraft}
+                style={{
+                  backgroundColor: "#6ac17a",
+                  borderRadius: "0",
+                  height: "40px",
+                  marginTop: "5px",
+                }}
+                variant="contained"
+              >
+                Go Back
+              </Button>
             </Container>
           </Container>
         </Grid>

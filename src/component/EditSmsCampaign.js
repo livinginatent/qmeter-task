@@ -13,11 +13,14 @@ import {
   Chip,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
-import React, { useState } from "react";
+import React, {  useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+
 import ConfirmationModal from "./ConfirmationModal";
-import { useNavigate } from "react-router-dom";
+import {  useSelector } from "react-redux";
+
+import { useNavigate, useParams } from "react-router-dom";
 
 const Field = styled(TextField)`
   // Custom TextField to avoid styling repetitions
@@ -30,21 +33,29 @@ const FieldName = styled(Typography)`
 
 const asterisk = <span style={{ color: "red" }}>*</span>;
 
-const SmsThread = () => {
-  const fromComponent = "SmsCampaign";
-  const navigate = useNavigate();
-  const [smsBalance, setSmsBalance] = useState("");
+const EditSmsCampaign = () => {
+  const fromComponent = "EditSmsCampaign";
+  const [smsCount, setSmsCount] = useState(0);
+  const {id} = useParams()
+  
+  const campaigns = useSelector((state) => state.campaign.campaigns);
+  const campaign = campaigns.find((c)=>c.id===parseInt(id))
+  console.log(campaign)
   const [formData, setFormData] = useState({
     type: "SMS",
-    dateCreated: new Date().toLocaleString(),
-    threadName: "",
+    id: campaign.id,
+    dateCreated: campaign.dateCreated,
+    threadName: campaign.threadName,
     from: "Qmeter or 2354",
-    customerName: "",
+    customerName: campaign.customerName,
     dropdownOption: "QNP-102 Template",
-    to: [],
-    startSending: new Date().toLocaleDateString(),
-    smsCount: smsBalance,
+    to: campaign.to,
+    startSending: campaign.startSending,
+    smsCount: campaign.smsCount,
+    editorContent: campaign.editorContent,
   });
+
+  const navigate = useNavigate();
 
   const {
     threadName,
@@ -53,14 +64,13 @@ const SmsThread = () => {
     dropdownOption,
     startSending,
     editorContent,
-    smsCount,
   } = formData;
 
   const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
-      smsCount: smsBalance,
+      smsCount: smsCount,
     }));
   };
 
@@ -68,13 +78,12 @@ const SmsThread = () => {
     setFormData((prevState) => ({
       ...prevState,
       editorContent: content,
-      smsCount: smsBalance,
     }));
 
     let limit = 156;
     let charCount = editor.getLength() - 1;
     let result = Math.ceil(charCount / limit);
-    setSmsBalance(result);
+    setSmsCount(result);
   };
 
   const [smsList, setSmsList] = useState([
@@ -103,7 +112,6 @@ const SmsThread = () => {
         setSelectedSmss(newSelectedSmss);
         setNewSms("");
 
-      
         // Clear the input field after adding the new Sms
       }
     }
@@ -132,22 +140,11 @@ const SmsThread = () => {
       handleCloseModal();
       return;
     }
-    if (formData.customerName === "") {
-      formData.customerName = "Customer";
-    }
     openModal();
   };
-  const handleDraft = () => {
-    // Get the existing drafts from localStorage
-    let drafts = JSON.parse(localStorage.getItem("drafts")) || [];
-
-    // Add the new formData to the drafts array
-    drafts.push(formData);
-
-    // Store the updated drafts array in localStorage
-    localStorage.setItem("drafts", JSON.stringify(drafts));
-    navigate("/");
-  };
+   const handleBack = () => {
+     navigate("/");
+   };
 
   return (
     <>
@@ -159,7 +156,7 @@ const SmsThread = () => {
             maxWidth={false}
             onSubmit={handleSubmit}
           >
-            <Container maxWidth={false}>
+            <Container noValidate maxWidth={false}>
               <CssBaseline />
               <Box>
                 <Grid
@@ -208,9 +205,9 @@ const SmsThread = () => {
                   <Grid item xs={6}>
                     <FieldName>To{asterisk}</FieldName>
                     <Autocomplete
-                      required={true}
                       multiple
                       id="tags-filled"
+                      value={selectedSmss}
                       options={[{ title: "Choose All" }, ...smsList]}
                       groupBy={(option) => option.group}
                       getOptionLabel={(option) => option.title}
@@ -228,7 +225,7 @@ const SmsThread = () => {
                         }
                         setFormData((prevState) => ({
                           ...prevState,
-                          to: newValue ? newValue.map((sms) => sms.title) : [],
+                          to: smsList.map((sms) => sms.title),
                         }));
                       }}
                       renderTags={(value, getTagProps) =>
@@ -246,11 +243,7 @@ const SmsThread = () => {
                       }
                       renderInput={(params) => (
                         <TextField
-                          {...params}
-                          InputProps={{
-                            ...params.InputProps,
-                            required: selectedSmss.length === 0,
-                          }}
+                          required
                           onChange={(e) => setNewSms(e.target.value)}
                           onKeyDown={onSmsKeyDown}
                           {...params}
@@ -303,6 +296,7 @@ const SmsThread = () => {
                 </Button>
                 <ConfirmationModal
                   open={isModalOpen}
+                  id={campaign.id}
                   handleClose={handleCloseModal}
                   type={formData.type}
                   confirm={handleConfirm}
@@ -311,7 +305,7 @@ const SmsThread = () => {
                 />
               </Container>
               <Button
-                onClick={handleDraft}
+                onClick={handleBack}
                 style={{
                   backgroundColor: "#6ac17a",
                   borderRadius: "0",
@@ -388,4 +382,4 @@ const SmsThread = () => {
   );
 };
 
-export default SmsThread;
+export default EditSmsCampaign;

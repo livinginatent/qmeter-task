@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -14,13 +14,12 @@ import Button from "@mui/material/Button";
 import { TextField, Container } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import EmailOrSms from "./EmailOrSms";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
-  
-  useNavigate,
-  
-} from "react-router-dom";
-
+  deleteCampaign,
+  draftCampaign,
+} from "../features/campaign/campaignSlice";
 
 const CustomTable = styled(Table)``;
 const SearchBar = styled(TextField)`
@@ -30,8 +29,42 @@ const SearchBar = styled(TextField)`
 
 const Campaigns = () => {
   const [searchText, setSearchText] = useState("");
+  const campaigns = useSelector((state) => state.campaign.campaigns);
+  const [filteredCampaigns, setFilteredCampaigns] = useState(campaigns);
+
+  // Update the filteredCampaigns array whenever the campaigns array changes
+  useEffect(() => {
+    setFilteredCampaigns(campaigns);
+  }, [campaigns]);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const drafts = JSON.parse(localStorage.getItem("drafts"));
+    if (drafts) {
+      drafts.forEach((element) => {
+        dispatch(draftCampaign(element));
+      });
+      localStorage.removeItem("drafts");
+    }
+  }, [dispatch]);
+
   const handleSearchInputChange = (event) => {
-    setSearchText(event.target.value);
+    const inputValue = event.target.value.toLowerCase();
+    setSearchText(inputValue);
+
+    if (inputValue === "") {
+      // Reset the sortedCampaigns to its original value
+      setFilteredCampaigns(campaigns);
+    } else {
+      // Filter the campaigns based on the input value
+      setTimeout(()=>{
+const filteredCampaigns = campaigns.filter((campaign) =>
+  campaign.threadName.toLowerCase().includes(inputValue)
+);
+setFilteredCampaigns(filteredCampaigns);
+      },500)
+      
+    }
   };
 
   const [openNewThread, setOpenNewThread] = useState(false);
@@ -42,24 +75,29 @@ const Campaigns = () => {
     setOpenNewThread(false);
   };
 
-  const campaigns = useSelector((state) => state.campaign.campaigns);
-
   const navigate = useNavigate();
-
-  const handleDelete = (id) => {
-    // dispatch a delete action here
-  };
 
   const handleView = (id) => {
     navigate(`view-campaign/${id}`);
   };
 
-  const handleEdit = (id) => {
-    // navigate to the edit page for this email using react-router-dom
+  const handleEdit = (id, type) => {
+    if (type === "SMS") {
+      navigate(`sms-edit/${id}`);
+    } else {
+      navigate(`email-edit/${id}`);
+    }
+  };
+  const handleDelete = (id) => {
+    dispatch(deleteCampaign(id));
+    setFilteredCampaigns(
+      filteredCampaigns.filter((campaign) => campaign.id !== id)
+    );
   };
 
   return (
     <>
+      {console.log(campaigns)}
       <Container sx={{ display: "flex" }} maxWidth={false}>
         <div>
           <Typography variant="h6">Campaigns</Typography>
@@ -111,35 +149,66 @@ const Campaigns = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {campaigns.map((campaign) => (
+              {filteredCampaigns.map((campaign, index) => (
                 <TableRow key={campaign.id}>
                   <TableCell component="th" scope="campaign">
-                    {campaign.id}
+                    {index + 1}
                   </TableCell>
-                  <TableCell>{campaign.threadName}</TableCell>
+                  <TableCell>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      {campaign.isDraft ? (
+                        <Typography
+                          sx={{
+                            paddingLeft:'5px',
+                            paddingRight:'3px',
+                            background: "#f7cac9",
+                            width: "40px",
+                            marginRight: "5px",
+                          }}
+                          color="error"
+                        >
+                          Draft
+                        </Typography>
+                      ) : null}
+                      <Typography>{campaign.threadName}</Typography>
+                    </div>
+                  </TableCell>
                   <TableCell>{campaign.type}</TableCell>
                   <TableCell>{campaign.startSending}</TableCell>
                   <TableCell>
                     {campaign.isDraft ? (
                       <Button
+                        sx={{
+                          borderRadius: "0",
+                          height: "40px",
+                        }}
+                        style={{ backgroundColor: "#fb9a00" }}
                         variant="contained"
-                        color="primary"
-                        onClick={() => handleEdit(campaign.id)}
+                        onClick={() => handleEdit(campaign.id, campaign.type)}
                       >
                         Edit
                       </Button>
                     ) : (
                       <Button
+                        sx={{
+                          borderRadius: "0",
+                          height: "40px",
+                        }}
+                        style={{ backgroundColor: "#fb9a00" }}
                         variant="contained"
-                        color="primary"
                         onClick={() => handleView(campaign.id, campaign.type)}
                       >
                         View
                       </Button>
                     )}
                     <Button
+                      sx={{
+                        borderRadius: "0",
+                        height: "40px",
+                        marginLeft: "5px",
+                      }}
+                      style={{ backgroundColor: "#c70000" }}
                       variant="contained"
-                      color="secondary"
                       onClick={() => handleDelete(campaign.id)}
                     >
                       Delete

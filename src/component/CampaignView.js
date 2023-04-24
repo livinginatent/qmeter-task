@@ -36,10 +36,11 @@ const CampaignView = () => {
     state.campaign.campaigns.find((c) => c.id === parseInt(id))
   );
 
-  
-console.log(campaign)
+
+
   return (
     <>
+    {console.log(campaign)}
       {campaign.type === "Email" ? (
         <Grid sx={{ backgroundColor: "white" }} container spacing={2}>
           <Grid item xs={8}>
