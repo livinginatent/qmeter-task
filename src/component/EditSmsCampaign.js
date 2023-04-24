@@ -40,7 +40,7 @@ const EditSmsCampaign = () => {
   
   const campaigns = useSelector((state) => state.campaign.campaigns);
   const campaign = campaigns.find((c)=>c.id===parseInt(id))
-  console.log(campaign)
+ 
   const [formData, setFormData] = useState({
     type: "SMS",
     id: campaign.id,
@@ -205,9 +205,9 @@ const EditSmsCampaign = () => {
                   <Grid item xs={6}>
                     <FieldName>To{asterisk}</FieldName>
                     <Autocomplete
+                      required={true}
                       multiple
                       id="tags-filled"
-                      value={selectedSmss}
                       options={[{ title: "Choose All" }, ...smsList]}
                       groupBy={(option) => option.group}
                       getOptionLabel={(option) => option.title}
@@ -225,7 +225,7 @@ const EditSmsCampaign = () => {
                         }
                         setFormData((prevState) => ({
                           ...prevState,
-                          to: smsList.map((sms) => sms.title),
+                          to: newValue ? newValue.map((sms) => sms.title) : [],
                         }));
                       }}
                       renderTags={(value, getTagProps) =>
@@ -243,7 +243,11 @@ const EditSmsCampaign = () => {
                       }
                       renderInput={(params) => (
                         <TextField
-                          required
+                          {...params}
+                          InputProps={{
+                            ...params.InputProps,
+                            required: selectedSmss.length === 0,
+                          }}
                           onChange={(e) => setNewSms(e.target.value)}
                           onKeyDown={onSmsKeyDown}
                           {...params}

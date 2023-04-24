@@ -36,11 +36,8 @@ const CampaignView = () => {
     state.campaign.campaigns.find((c) => c.id === parseInt(id))
   );
 
-
-
   return (
     <>
-    {console.log(campaign)}
       {campaign.type === "Email" ? (
         <Grid sx={{ backgroundColor: "white" }} container spacing={2}>
           <Grid item xs={8}>
@@ -362,7 +359,7 @@ const CampaignView = () => {
                 </Typography>
               </Typography>
               <Divider sx={{ mt: "10px", mb: "10px" }} />
-              
+
               <Typography
                 sx={{
                   display: "flex",

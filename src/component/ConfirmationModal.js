@@ -2,9 +2,8 @@ import { styled } from "@mui/material/styles";
 import { Button, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
-  
   editDraftCampaign,
   newCampaign,
 } from "../features/campaign/campaignSlice";
@@ -26,23 +25,12 @@ const ConfirmationModal = ({
 }) => {
   const navigate = useNavigate();
 
-  const campaigns = useSelector((state) => state.campaign.campaigns);
-  
-  const campaignExists = campaigns.find(
-    (campaign) => campaign.id === formData.id
-  );
-
-  
-
   const dispatch = useDispatch();
   const handleConfirm = (path) => {
-    console.log(campaignExists)
-
     if (
       confirm &&
       (fromComponent === "EditEmailCampaign" ||
-        fromComponent === "EditSmsCampaign") &&
-      !campaignExists
+        fromComponent === "EditSmsCampaign")
     ) {
       dispatch(editDraftCampaign(formData));
     } else if (

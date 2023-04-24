@@ -97,7 +97,7 @@ setFilteredCampaigns(filteredCampaigns);
 
   return (
     <>
-      {console.log(campaigns)}
+     
       <Container sx={{ display: "flex" }} maxWidth={false}>
         <div>
           <Typography variant="h6">Campaigns</Typography>
